@@ -1,13 +1,5 @@
-/**
- * MÓDULO DE RENDERIZADO - PLANTILLA HTML FRONTEND (ACTUALIZADO CON 9 SUPLENTES)
- * * * Responsabilidad:
- * - Aislar la estructura visual de la interfaz del enrutamiento lógico.
- * - Expone una función pura que devuelve el documento Single Page Application (Tailwind + Lucide).
- * - Clasifica con colores específicos a los 3 cargos titulares y a los 9 suplentes de la ONPE.
- */
-
 export function getFrontendHTML() {
-  return `
+    return `
 <!DOCTYPE html>
 <html lang="es" class="h-full bg-slate-950 text-slate-100">
 <head>
@@ -63,7 +55,7 @@ export function getFrontendHTML() {
                             <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500">
                                 <i data-lucide="user" class="h-5 w-5"></i>
                             </span>
-                            <input id="username" name="username" type="text" required class="block w-full pl-10 pr-3 py-2 border border-slate-800 bg-slate-950 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-100 placeholder-slate-600 sm:text-sm" placeholder="Ej: mesa27-lima">
+                            <input id="username" name="username" type="text" required class="block w-full pl-10 pr-3 py-2 border border-slate-800 bg-slate-950 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-slate-100 placeholder-slate-600 sm:text-sm" placeholder="Ej: JuanPimentel">
                         </div>
                     </div>
 
@@ -129,17 +121,23 @@ export function getFrontendHTML() {
                 <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm">
                     <h2 class="text-base font-bold text-white flex items-center gap-2 mb-4">
                         <i data-lucide="user-plus" class="text-blue-500 h-5 w-5"></i>
-                        <span>Añadir Miembro de Mesa</span>
+                        <span>Añadir Miembro de Mesa (Jerarquía ONPE)</span>
                     </h2>
                     <form id="member-form" onsubmit="handleAddMember(event)" class="space-y-4">
-                        <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400">Nombre Completo</label>
-                            <input id="m-name" type="text" required class="mt-1 block w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-100 text-sm placeholder-slate-700" placeholder="Ej: Juan Pérez Díaz">
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="col-span-1">
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400">N° Mesa</label>
+                                <input id="m-mesa" type="text" required class="mt-1 block w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-100 text-sm placeholder-slate-750" placeholder="081428">
+                            </div>
+                            <div class="col-span-2">
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400">Nombre Completo</label>
+                                <input id="m-name" type="text" required class="mt-1 block w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-100 text-sm placeholder-slate-700" placeholder="Ej: Juan Pérez Díaz">
+                            </div>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400">Celular (Perú)</label>
-                                <input id="m-phone" type="text" required class="mt-1 block w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-100 text-sm placeholder-slate-700" placeholder="Ej: 912345678">
+                                <input id="m-phone" type="text" required class="mt-1 block w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-100 text-sm placeholder-slate-700" placeholder="Ej: 986936332">
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400">Cargo de Mesa</label>
@@ -149,57 +147,36 @@ export function getFrontendHTML() {
                                         <option value="Secretario">Secretario</option>
                                         <option value="Tercer Miembro">Tercer Miembro</option>
                                     </optgroup>
-                                    <optgroup label="Miembros Suplentes">
+                                    <optgroup label="Miembros Suplentes Oficiales">
                                         <option value="1er Suplente">1er Suplente</option>
                                         <option value="2do Suplente">2do Suplente</option>
                                         <option value="3er Suplente">3er Suplente</option>
                                         <option value="4to Suplente">4to Suplente</option>
                                         <option value="5to Suplente">5to Suplente</option>
                                         <option value="6to Suplente">6to Suplente</option>
-                                        <option value="7mo Suplente">7mo Suplente</option>
-                                        <option value="8vo Suplente">8vo Suplente</option>
-                                        <option value="9no Suplente">9no Suplente</option>
                                     </optgroup>
                                 </select>
                             </div>
                         </div>
                         <button type="submit" class="w-full inline-flex items-center justify-center gap-2 py-2 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition-colors shadow-lg shadow-blue-950/50">
                             <i data-lucide="plus" class="h-4 w-4"></i>
-                            <span>Registrar Miembro</span>
+                            <span>Registrar en la Mesa</span>
                         </button>
                     </form>
                 </div>
 
-                <!-- LISTADO DE MIEMBROS -->
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm flex-1 flex flex-col min-h-[400px]">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-base font-bold text-white flex items-center gap-2">
-                            <i data-lucide="users" class="text-emerald-500 h-5 w-5"></i>
-                            <span>Mis Coordinados (<span id="members-count">0</span>)</span>
-                        </h2>
-                        <span class="text-xs text-slate-500 font-medium">Meta: 27 miembros</span>
-                    </div>
-
-                    <!-- TABLA CONTENEDOR CON SCROLL -->
-                    <div class="flex-1 overflow-y-auto max-h-[500px] border border-slate-850 rounded-xl bg-slate-950/50">
-                        <table class="min-w-full divide-y divide-slate-850">
-                            <thead class="bg-slate-950">
-                                <tr>
-                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">Nombre</th>
-                                    <th scope="col" class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">Cargo</th>
-                                    <th scope="col" class="relative px-4 py-3"></th>
-                                </tr>
-                            </thead>
-                            <tbody id="members-table-body" class="divide-y divide-slate-900">
-                                <!-- Miembros inyectados dinámicamente -->
-                            </tbody>
-                        </table>
-                        <div id="no-members-view" class="hidden flex flex-col items-center justify-center py-16 px-4 text-center">
-                            <i data-lucide="users-round" class="h-10 w-10 text-slate-700 mb-2"></i>
-                            <p class="text-sm font-medium text-slate-400">No hay coordinados registrados</p>
-                            <p class="text-xs text-slate-600 mt-1">Utiliza el formulario de arriba para añadir miembros a tu mesa</p>
-                        </div>
-                    </div>
+                <!-- EDITOR DE PLANTILLA DINÁMICA -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm">
+                    <h2 class="text-base font-bold text-white flex items-center gap-2 mb-2">
+                        <i data-lucide="edit-3" class="text-orange-500 h-5 w-5"></i>
+                        <span>Editar Mensaje de Presentación</span>
+                    </h2>
+                    <p class="text-xs text-slate-400 mb-3">Usa las etiquetas dinámicas: <code class="text-blue-400 font-bold">{{nombre}}</code>, <code class="text-indigo-400 font-bold">{{cargo}}</code>, <code class="text-emerald-400 font-bold">{{mesa}}</code>.</p>
+                    <textarea id="template-editor" rows="6" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 text-xs font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none" placeholder="Escribe tu mensaje aquí..."></textarea>
+                    <button onclick="saveTemplate()" class="mt-3 w-full py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-750 text-slate-200 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center gap-2">
+                        <i data-lucide="save" class="h-3.5 w-3.5"></i>
+                        <span>Guardar Cambios de Plantilla</span>
+                    </button>
                 </div>
             </section>
 
@@ -219,6 +196,11 @@ export function getFrontendHTML() {
                             <span class="h-2.5 w-2.5 rounded-full bg-slate-600 animate-pulse" id="status-indicator"></span>
                             <span id="status-text" class="text-xs font-bold uppercase tracking-wider text-slate-400">DESCONECTADO</span>
                         </div>
+                    </div>
+
+                    <!-- ACCIONES DE WHATSAPP -->
+                    <div class="flex justify-end gap-3 mb-4 hidden" id="wa-actions-panel">
+                        <!-- Botones de acción dinámicos -->
                     </div>
 
                     <!-- VISUALIZADOR DE QR O ESTADOS -->
@@ -292,19 +274,57 @@ export function getFrontendHTML() {
                     </div>
                 </div>
 
-                <!-- CONSOLA INTERACTIVA DE PROGRESO DE ENVÍO -->
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm flex-1 flex flex-col min-h-[300px]">
-                    <div class="flex justify-between items-center mb-3">
+                <!-- TABLA DE COORDINADOS OPERATIVOS -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm flex-1 flex flex-col min-h-[350px]">
+                    <div class="flex justify-between items-center mb-4">
                         <h2 class="text-base font-bold text-white flex items-center gap-2">
-                            <i data-lucide="terminal" class="text-blue-500 h-5 w-5"></i>
-                            <span>Consola de Notificación en Tiempo Real</span>
+                            <i data-lucide="table" class="text-emerald-500 h-5 w-5"></i>
+                            <span>Matriz de Miembros Electorales (<span id="members-count">0</span>)</span>
                         </h2>
-                        <button onclick="clearConsole()" class="text-xs font-medium text-slate-500 hover:text-slate-300 transition-colors">Limpiar log</button>
+                        <button onclick="exportToExcel()" class="py-1.5 px-3 bg-emerald-700 hover:bg-emerald-600 text-white border border-emerald-600 rounded-lg text-xs font-bold transition-colors flex items-center gap-1">
+                            <i data-lucide="download" class="h-3.5 w-3.5"></i>
+                            <span>Exportar a Excel</span>
+                        </button>
+                    </div>
+
+                    <!-- TABLA CONTENEDOR CON SCROLL -->
+                    <div class="flex-1 overflow-y-auto max-h-[300px] border border-slate-850 rounded-xl bg-slate-950/50">
+                        <table class="min-w-full divide-y divide-slate-850 text-xs">
+                            <thead class="bg-slate-950 sticky top-0 z-10">
+                                <tr>
+                                    <th scope="col" class="px-3 py-2 text-left font-semibold uppercase text-slate-400">Mesa</th>
+                                    <th scope="col" class="px-3 py-2 text-left font-semibold uppercase text-slate-400">Miembro / Teléfono</th>
+                                    <th scope="col" class="px-3 py-2 text-left font-semibold uppercase text-slate-400">Cargo</th>
+                                    <th scope="col" class="px-3 py-2 text-center font-semibold uppercase text-slate-400">Llamado</th>
+                                    <th scope="col" class="px-3 py-2 text-center font-semibold uppercase text-slate-400">Capacitado</th>
+                                    <th scope="col" class="relative px-3 py-2"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="members-table-body" class="divide-y divide-slate-900">
+                                <!-- Miembros inyectados dinámicamente -->
+                            </tbody>
+                        </table>
+                        <div id="no-members-view" class="hidden flex flex-col items-center justify-center py-16 px-4 text-center">
+                            <i data-lucide="users-round" class="h-10 w-10 text-slate-700 mb-2"></i>
+                            <p class="text-sm font-medium text-slate-400">No hay coordinados registrados</p>
+                            <p class="text-xs text-slate-600 mt-1">Utiliza el formulario de la izquierda para añadir miembros a tu mesa</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CONSOLA INTERACTIVA DE PROGRESO DE ENVÍO -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm flex flex-col h-[200px]">
+                    <div class="flex justify-between items-center mb-2">
+                        <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                            <i data-lucide="terminal" class="h-3.5 w-3.5"></i>
+                            <span>Bitácora de Despacho en Vivo</span>
+                        </h2>
+                        <button onclick="clearConsole()" class="text-[10px] font-medium text-slate-500 hover:text-slate-300 transition-colors">Limpiar log</button>
                     </div>
 
                     <!-- ÁREA DE LOGS -->
-                    <div id="console-output" class="flex-1 bg-slate-950 p-4 border border-slate-850 rounded-xl overflow-y-auto max-h-[250px] font-mono text-xs flex flex-col gap-2">
-                        <span class="text-slate-600">[SISTEMA]: Esperando el inicio de un proceso de transmisión...</span>
+                    <div id="console-output" class="flex-1 bg-slate-950 p-3 border border-slate-850 rounded-xl overflow-y-auto font-mono text-[10px] flex flex-col gap-1 text-slate-500">
+                        [SISTEMA]: Esperando inicialización de tráfico asíncrono secuencial...
                     </div>
                 </div>
             </section>
@@ -419,11 +439,43 @@ export function getFrontendHTML() {
             
             // Cargar datos iniciales
             loadMembers();
+            loadTemplate();
             
             // Iniciar Polling de estado de WhatsApp
             if (waStatusPoller) clearInterval(waStatusPoller);
             waStatusPoller = setInterval(pollWhatsAppStatus, 1500);
             pollWhatsAppStatus();
+        }
+
+        // -----------------------------------------------------------------
+        // CONTROL DE PLANTILLAS DINÁMICAS
+        // -----------------------------------------------------------------
+        async function loadTemplate() {
+            try {
+                const res = await fetch('/api/template');
+                const data = await res.json();
+                document.getElementById('template-editor').value = data.template;
+            } catch (err) {
+                console.error("Error al cargar la plantilla:", err);
+            }
+        }
+
+        async function saveTemplate() {
+            const templateValue = document.getElementById('template-editor').value;
+            try {
+                const res = await fetch('/api/template', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ template: templateValue })
+                });
+                if (res.ok) {
+                    alert("Plantilla de presentación electoral guardada con éxito.");
+                } else {
+                    alert("No se pudo guardar la plantilla.");
+                }
+            } catch (err) {
+                alert("Error de red al guardar la plantilla.");
+            }
         }
 
         // -----------------------------------------------------------------
@@ -452,25 +504,30 @@ export function getFrontendHTML() {
                     const tr = document.createElement('tr');
                     
                     // Colores de insignias personalizados para Titulares y Suplentes (ONPE Oficial)
-                    let roleBadgeColor = "bg-slate-900 border-slate-800 text-slate-300";
-                    if (m.rol === 'Presidente') roleBadgeColor = "bg-blue-950/40 border-blue-900/40 text-blue-400";
-                    if (m.rol === 'Secretario') roleBadgeColor = "bg-indigo-950/40 border-indigo-900/40 text-indigo-400";
-                    if (m.rol === 'Tercer Miembro') roleBadgeColor = "bg-emerald-950/40 border-emerald-900/40 text-emerald-400";
-                    if (m.rol.includes('Suplente')) roleBadgeColor = "bg-amber-950/40 border-amber-900/40 text-amber-400";
+                    let badge = "bg-slate-900 border-slate-800 text-slate-300";
+                    if (m.rol === 'Presidente') badge = "bg-blue-950/40 border-blue-900/40 text-blue-400";
+                    if (m.rol === 'Secretario') badge = "bg-indigo-950/40 border-indigo-900/40 text-indigo-400";
+                    if (m.rol === 'Tercer Miembro') badge = "bg-emerald-950/40 border-emerald-900/40 text-emerald-400";
+                    if (m.rol.includes('Suplente')) badge = "bg-amber-950/40 border-amber-900/40 text-amber-400";
 
                     tr.innerHTML = \`
-                        <td class="px-4 py-3 whitespace-nowrap">
-                            <div class="text-sm font-semibold text-white">\${m.nombre}</div>
-                            <div class="text-xs text-slate-400">\${m.telefono}</div>
+                        <td class="px-3 py-2 font-bold text-slate-300">\${m.mesa}</td>
+                        <td class="px-3 py-2">
+                            <div class="font-bold text-white">\${m.nombre}</div>
+                            <div class="text-slate-400 text-[11px]">\${m.telefono}</div>
                         </td>
-                        <td class="px-4 py-3 whitespace-nowrap">
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border \${roleBadgeColor}">
-                                \${m.rol}
-                            </span>
+                        <td class="px-3 py-2">
+                            <span class="px-2 py-0.5 rounded-full border text-[10px] font-bold \${badge}">\${m.rol}</span>
                         </td>
-                        <td class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
-                            <button onclick="handleDeleteMember('\${m.id}')" class="text-slate-500 hover:text-red-400 transition-colors p-1 rounded hover:bg-slate-900">
-                                <i data-lucide="trash" class="h-4 w-4"></i>
+                        <td class="px-3 py-2 text-center">
+                            <input type="checkbox" \${m.llamado ? 'checked' : ''} onchange="toggleStatus('\${m.id}', 'llamado', this.checked)" class="rounded bg-slate-950 border-slate-800 text-blue-600 focus:ring-0">
+                        </td>
+                        <td class="px-3 py-2 text-center">
+                            <input type="checkbox" \${m.capacitado ? 'checked' : ''} onchange="toggleStatus('\${m.id}', 'capacitado', this.checked)" class="rounded bg-slate-950 border-slate-800 text-emerald-600 focus:ring-0">
+                        </td>
+                        <td class="px-3 py-2 text-right">
+                            <button onclick="deleteMember('\${m.id}')" class="text-slate-500 hover:text-red-400 transition-colors p-1 rounded hover:bg-slate-900">
+                                <i data-lucide="trash" class="h-3.5 w-3.5"></i>
                             </button>
                         </td>
                     \`;
@@ -485,11 +542,13 @@ export function getFrontendHTML() {
 
         async function handleAddMember(e) {
             e.preventDefault();
+            const mesaInput = document.getElementById('m-mesa');
             const nameInput = document.getElementById('m-name');
             const phoneInput = document.getElementById('m-phone');
             const roleSelect = document.getElementById('m-role');
 
             const payload = {
+                mesa: mesaInput.value,
                 nombre: nameInput.value,
                 telefono: phoneInput.value,
                 rol: roleSelect.value
@@ -515,15 +574,33 @@ export function getFrontendHTML() {
             }
         }
 
-        async function handleDeleteMember(id) {
+        async function toggleStatus(id, field, value) {
             try {
-                const res = await fetch(\`/api/members/\${id}\`, { method: 'DELETE' });
-                if (res.ok) {
-                    loadMembers();
-                }
+                await fetch(\`/api/members/\${id}/status\`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ field, value })
+                });
             } catch (err) {
-                console.error(err);
+                console.error("No se pudo actualizar el estado del miembro:", err);
             }
+        }
+
+        async function deleteMember(id) {
+            if (confirm("¿Estás seguro de que deseas eliminar este miembro de mesa de la lista?")) {
+                try {
+                    const res = await fetch(\`/api/members/\${id}\`, { method: 'DELETE' });
+                    if (res.ok) {
+                        loadMembers();
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+        }
+
+        function exportToExcel() {
+            window.location.href = '/api/export/csv';
         }
 
         // -----------------------------------------------------------------
@@ -639,9 +716,9 @@ export function getFrontendHTML() {
             consoleOutput.innerHTML = '';
             logs.forEach(log => {
                 let colorClass = 'text-slate-400';
-                if (log.type === 'success') colorClass = 'text-emerald-400';
-                if (log.type === 'warning') colorClass = 'text-amber-400';
-                if (log.type === 'error') colorClass = 'text-rose-400';
+                if (log.type === 'success') colorClass = 'text-emerald-400 font-semibold';
+                if (log.type === 'warning') colorClass = 'text-amber-400 font-semibold';
+                if (log.type === 'error') colorClass = 'text-rose-400 font-semibold';
 
                 const logElement = document.createElement('div');
                 logElement.className = \`flex gap-2 items-start \${colorClass}\`;
