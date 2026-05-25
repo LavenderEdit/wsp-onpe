@@ -1,0 +1,18 @@
+{
+  "name": "wsp-onpe",
+  "version": "1.0.0",
+  "description": "Replicador asíncrono seguro para la ONPE con pnpm",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@open-wa/wa-automate": "^4.76.0",
+    "cookie-parser": "^1.4.7",
+    "express": "^5.2.1"
+  }
+}
