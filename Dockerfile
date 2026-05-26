@@ -8,7 +8,6 @@ RUN apt-get update && apt-get install -y \
     fonts-kacst \
     fonts-freefont-ttf \
     libxss1 \
-    --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
@@ -25,4 +24,4 @@ COPY . .
 
 EXPOSE 9000
 
-CMD ["node", "index.js"]
+CMD sh -c "find .wwebjs_auth -name 'SingletonLock' -delete 2>/dev/null || true; node index.js"
