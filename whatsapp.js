@@ -119,30 +119,55 @@ class WhatsAppManager {
             throw new Error("No tienes miembros de mesa registrados para enviar.");
         }
 
+        const template = db.getTemplate(userId);
+        const { image1, image2 } = db.getUserImagesInfo(userId);
+
         this.waStatus = 'SENDING';
         this.broadcastLogs = [];
         this.logBroadcast(`Iniciando envío asíncrono secuencial a ${miembros.length} destinatarios...`, "info");
+
+        const hasImg1 = !!image1;
+        const hasImg2 = !!image2;
+
+        if (hasImg1 || hasImg2) {
+            this.logBroadcast("Se detectaron recursos de imagen activos. Los mensajes se procesarán en formato multimedia.", "info");
+        } else {
+            this.logBroadcast("No hay imágenes activas. Se utilizará envío de texto plano convencional.", "info");
+        }
 
         (async () => {
             for (const miembro of miembros) {
                 try {
                     const jid = this.normalizarNumeroPeru(miembro.telefono);
-                    const mensaje =
-                        `Hola *${miembro.nombre}*, te saluda el coordinador electoral de tu mesa de votación. 
 
-Has sido asignado bajo el cargo de: *${miembro.rol}*. Tu presencia es de vital importancia para asegurar la transparencia del proceso electoral.
+                    const mensajePersonalizado = template
+                        .replace(/{{nombre}}/g, miembro.nombre)
+                        .replace(/{{cargo}}/g, miembro.rol)
+                        .replace(/{{mesa}}/g, miembro.mesa);
 
-⚠️ *CONFIRMACIÓN ADMINISTRATIVA REQUERIDA:*
-Por favor, responde directamente a este mensaje con la palabra *RECIBIDO* para confirmar tu asistencia y coordinar los detalles logísticos.
+                    this.logBroadcast(`Enviando a ${miembro.nombre} (Mesa ${miembro.mesa})...`, "info");
 
-_Mensaje automatizado de coordinación local._`;
+                    if (hasImg1 && hasImg2) {
+                        await this.waClient.sendImage(jid, image1, 'onpe_info1.png', mensajePersonalizado);
+                        await this.delay(1500);
+                        await this.waClient.sendImage(jid, image2, 'onpe_info2.png', '');
+                        this.logBroadcast(`[✓ ENTREGADO] Mensaje multimedia doble enviado a ${miembro.nombre}.`, "success");
 
-                    this.logBroadcast(`Enviando mensaje a ${miembro.nombre} (${jid})...`, "info");
-                    const resEnvio = await this.waClient.sendText(jid, mensaje);
+                    } else if (hasImg1) {
+                        await this.waClient.sendImage(jid, image1, 'onpe_info.png', mensajePersonalizado);
+                        this.logBroadcast(`[✓ ENTREGADO] Mensaje con imagen enviado a ${miembro.nombre}.`, "success");
 
-                    if (resEnvio) {
-                        this.logBroadcast(`[✓ ENTREGADO] Mensaje enviado a ${miembro.nombre}.`, "success");
+                    } else if (hasImg2) {
+                        await this.waClient.sendImage(jid, image2, 'onpe_info.png', mensajePersonalizado);
+                        this.logBroadcast(`[✓ ENTREGADO] Mensaje con imagen enviado a ${miembro.nombre}.`, "success");
+
+                    } else {
+                        const resEnvio = await this.waClient.sendText(jid, mensajePersonalizado);
+                        if (resEnvio) {
+                            this.logBroadcast(`[✓ ENTREGADO] Mensaje de texto enviado a ${miembro.nombre}.`, "success");
+                        }
                     }
+
                 } catch (err) {
                     this.logBroadcast(`[X ERROR] No se pudo enviar a ${miembro.nombre}: ${err.message}`, "error");
                 }
