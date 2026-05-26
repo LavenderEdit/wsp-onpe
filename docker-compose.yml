@@ -1,0 +1,13 @@
+services:
+  wsp-onpe:
+    build: .
+    container_name: wsp-onpe-app
+    ports:
+      - "9000:9000"
+    environment:
+      - IS_DOCKER=true
+    volumes:
+      - ./db.json:/app/db.json
+      - ./.wwebjs_auth:/app/.wwebjs_auth
+      - ./uploads:/app/uploads
+    restart: unless-stopped
