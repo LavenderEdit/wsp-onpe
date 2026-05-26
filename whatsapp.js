@@ -45,16 +45,18 @@ class WhatsAppManager {
         this.waQrCode = null;
         this.broadcastLogs = [];
 
-        this.logBroadcast("Iniciando motor Chromium en segundo plano...");
+        this.logBroadcast("Iniciando motor Google Chrome (Modo Visible)...");
 
         create({
             sessionId: `Session_${userId}`,
             multiDevice: true,
-            authTimeout: 0,
+            authTimeout: 60,
             qrTimeout: 0,
             blockCrashLogs: true,
             disableSpins: true,
-            headless: true,
+            headless: false,
+            useChrome: true,
+            cacheEnabled: false,
             hostNotificationLang: 'es-ES',
             qrLogSkip: true,
             qrCallback: (base64QrImg) => {
