@@ -9,3 +9,7 @@ uploads
 **.node-persist**
 **_IGNORE_**
 **_PERSIST_**
+**.wwebjs_auth**
+**.wwebjs_session**
+**.wwebjs_cache**
+**.wwebjs_store**
