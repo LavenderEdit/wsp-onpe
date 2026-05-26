@@ -5,3 +5,7 @@ pnpm-workspace.yaml
 dist/
 uploads
 .node-persist
+**.data.json
+**.node-persist**
+**_IGNORE_**
+**_PERSIST_**
