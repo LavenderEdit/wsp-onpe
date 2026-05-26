@@ -1,15 +1,14 @@
 export function getFrontendHTML() {
-    return `
+  return `
 <!DOCTYPE html>
 <html lang="es" class="h-full bg-slate-950 text-slate-100">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Replicador de Coordinación Electoral ONPE</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons para diseño premium -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         /* Estilos personalizados para barra de scroll y consola */
         ::-webkit-scrollbar {
@@ -30,7 +29,6 @@ export function getFrontendHTML() {
 </head>
 <body class="h-full font-sans antialiased flex flex-col justify-between">
 
-    <!-- PANTALLA DE AUTENTICACIÓN (LOGIN/REGISTRO) -->
     <div id="auth-section" class="hidden min-h-full flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-slate-950">
         <div class="sm:mx-auto sm:w-full sm:max-w-md text-center">
             <div class="inline-flex items-center justify-center h-16 w-16 rounded-full bg-blue-600/10 text-blue-500 mb-4">
@@ -42,7 +40,6 @@ export function getFrontendHTML() {
 
         <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
             <div class="bg-slate-900 py-8 px-4 shadow-xl border border-slate-800 rounded-2xl sm:px-10">
-                <!-- TABS -->
                 <div class="flex border-b border-slate-800 mb-6">
                     <button id="tab-login" onclick="toggleAuthTab('login')" class="flex-1 pb-3 text-center font-medium border-b-2 border-blue-500 text-blue-400">Iniciar Sesión</button>
                     <button id="tab-register" onclick="toggleAuthTab('register')" class="flex-1 pb-3 text-center font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200">Registrarse</button>
@@ -84,9 +81,7 @@ export function getFrontendHTML() {
         </div>
     </div>
 
-    <!-- PANEL PRINCIPAL (DASHBOARD) -->
     <div id="dashboard-section" class="hidden min-h-screen flex flex-col bg-slate-950">
-        <!-- HEADER -->
         <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between h-16">
@@ -113,11 +108,8 @@ export function getFrontendHTML() {
             </div>
         </header>
 
-        <!-- MAIN CONTAINER -->
         <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <!-- PANEL IZQUIERDO: GESTION DE MIEMBROS Y PLANTILLA (5 columnas) -->
             <section class="lg:col-span-5 flex flex-col gap-6">
-                <!-- FORMULARIO AGREGAR -->
                 <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm">
                     <h2 class="text-base font-bold text-white flex items-center gap-2 mb-4">
                         <i data-lucide="user-plus" class="text-blue-500 h-5 w-5"></i>
@@ -165,7 +157,6 @@ export function getFrontendHTML() {
                     </form>
                 </div>
 
-                <!-- EDITOR DE PLANTILLA DINÁMICA -->
                 <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm">
                     <h2 class="text-base font-bold text-white flex items-center gap-2 mb-2">
                         <i data-lucide="edit-3" class="text-orange-500 h-5 w-5"></i>
@@ -179,7 +170,6 @@ export function getFrontendHTML() {
                     </button>
                 </div>
 
-                <!-- SECCIÓN MULTIMEDIA (NUEVO) -->
                 <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm">
                     <h2 class="text-base font-bold text-white flex items-center gap-2 mb-2">
                         <i data-lucide="image" class="text-indigo-500 h-5 w-5"></i>
@@ -188,7 +178,6 @@ export function getFrontendHTML() {
                     <p class="text-xs text-slate-400 mb-4">Sube infografías, fotos de credenciales o croquis. Se enviarán junto con tu mensaje.</p>
                     
                     <div class="grid grid-cols-2 gap-4">
-                        <!-- ESPACIO DE IMAGEN 1 -->
                         <div class="flex flex-col items-center">
                             <span class="text-xs text-slate-400 mb-1 font-semibold">Imagen 1 (Principal)</span>
                             <div id="img1-container" class="w-full h-32 rounded-xl border border-slate-800 bg-slate-950/40 flex flex-col items-center justify-center relative overflow-hidden transition-all hover:border-blue-500/50">
@@ -207,7 +196,6 @@ export function getFrontendHTML() {
                             <input id="file-input-1" type="file" accept="image/*" class="hidden" onchange="handleFileChange(1, this)">
                         </div>
 
-                        <!-- ESPACIO DE IMAGEN 2 -->
                         <div class="flex flex-col items-center">
                             <span class="text-xs text-slate-400 mb-1 font-semibold">Imagen 2 (Anexo)</span>
                             <div id="img2-container" class="w-full h-32 rounded-xl border border-slate-800 bg-slate-950/40 flex flex-col items-center justify-center relative overflow-hidden transition-all hover:border-blue-500/50">
@@ -229,9 +217,7 @@ export function getFrontendHTML() {
                 </div>
             </section>
 
-            <!-- PANEL DERECHO: CONECTOR DE WHATSAPP Y TRANSMISIÓN (7 columnas) -->
             <section class="lg:col-span-7 flex flex-col gap-6">
-                <!-- CONTROLADOR DE SESIÓN DE WHATSAPP -->
                 <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                         <div>
@@ -247,11 +233,9 @@ export function getFrontendHTML() {
                         </div>
                     </div>
 
-                    <!-- VISUALIZADOR DE QR O ESTADOS -->
                     <div class="flex flex-col items-center justify-center border-2 border-dashed border-slate-800 rounded-2xl p-6 bg-slate-950 min-h-[280px]">
                         
-                        <!-- ESTADO: DESCONECTADO -->
-                        <div id="wa-view-disconnected" class="flex flex-col items-center text-center max-w-sm">
+                        <div id="wa-view-disconnected" class="hidden flex flex-col items-center text-center max-w-sm">
                             <div class="h-12 w-12 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-500 mb-4">
                                 <i data-lucide="message-square-off" class="h-6 w-6"></i>
                             </div>
@@ -263,18 +247,15 @@ export function getFrontendHTML() {
                             </button>
                         </div>
 
-                        <!-- ESTADO: INICIALIZANDO -->
                         <div id="wa-view-initializing" class="hidden flex flex-col items-center text-center">
                             <div class="h-12 w-12 rounded-full border-4 border-slate-800 border-t-blue-500 animate-spin mb-4"></div>
                             <h3 class="text-sm font-bold text-white">Abriendo Navegador Chromium...</h3>
                             <p class="text-xs text-slate-400 mt-2 max-w-xs leading-relaxed">Esto puede tardar de 10 a 20 segundos según el rendimiento de tu procesador local. Por favor, espera.</p>
                         </div>
 
-                        <!-- ESTADO: ESPERANDO QR (CÓDIGO QR ACTIVO) -->
                         <div id="wa-view-qr" class="hidden flex flex-col items-center text-center">
-                            <div id="qr-image-container" class="bg-white p-3 rounded-xl border border-slate-200 shadow-xl mb-4">
-                                <!-- Aquí se incrusta el QR dinámico -->
-                            </div>
+                            <div id="qr-image-container" class="bg-white p-4 rounded-xl shadow-xl mb-4 flex items-center justify-center">
+                                </div>
                             <h3 class="text-sm font-bold text-white">Escanea el Código QR</h3>
                             <p class="text-xs text-slate-400 mt-2 max-w-sm leading-relaxed">Abre WhatsApp en tu celular -> Ajustes / Dispositivos Vinculados -> Vincular dispositivo.</p>
                             <button onclick="stopWhatsApp()" class="mt-4 inline-flex items-center gap-2 py-1.5 px-3 rounded-lg border border-red-900 bg-red-950/30 text-red-400 hover:bg-red-900 hover:text-white text-xs font-semibold transition-colors">
@@ -283,7 +264,6 @@ export function getFrontendHTML() {
                             </button>
                         </div>
 
-                        <!-- ESTADO: CONECTADO / ACTIVO -->
                         <div id="wa-view-connected" class="hidden flex flex-col items-center text-center max-w-sm">
                             <div class="h-16 w-16 rounded-full bg-emerald-600/10 border border-emerald-500/20 text-emerald-500 flex items-center justify-center mb-4">
                                 <i data-lucide="check-circle" class="h-10 w-10"></i>
@@ -303,7 +283,6 @@ export function getFrontendHTML() {
                             </div>
                         </div>
 
-                        <!-- ESTADO: ENVIANDO EN CURSO -->
                         <div id="wa-view-sending" class="hidden flex flex-col items-center text-center">
                             <div class="relative flex items-center justify-center mb-4">
                                 <div class="absolute h-16 w-16 rounded-full border-4 border-emerald-500/20 border-t-emerald-500 animate-spin"></div>
@@ -318,7 +297,6 @@ export function getFrontendHTML() {
                     </div>
                 </div>
 
-                <!-- TABLA DE COORDINADOS OPERATIVOS -->
                 <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm flex-1 flex flex-col min-h-[350px]">
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-base font-bold text-white flex items-center gap-2">
@@ -331,7 +309,6 @@ export function getFrontendHTML() {
                         </button>
                     </div>
 
-                    <!-- TABLA CONTENEDOR CON SCROLL -->
                     <div class="flex-1 overflow-y-auto max-h-[300px] border border-slate-850 rounded-xl bg-slate-950/50">
                         <table class="min-w-full divide-y divide-slate-850 text-xs">
                             <thead class="bg-slate-950 sticky top-0 z-10">
@@ -345,8 +322,7 @@ export function getFrontendHTML() {
                                 </tr>
                             </thead>
                             <tbody id="members-table-body" class="divide-y divide-slate-900">
-                                <!-- Miembros inyectados dinámicamente -->
-                            </tbody>
+                                </tbody>
                         </table>
                         <div id="no-members-view" class="hidden flex flex-col items-center justify-center py-16 px-4 text-center">
                             <i data-lucide="users-round" class="h-10 w-10 text-slate-700 mb-2"></i>
@@ -356,7 +332,6 @@ export function getFrontendHTML() {
                     </div>
                 </div>
 
-                <!-- CONSOLA INTERACTIVA DE PROGRESO DE ENVÍO -->
                 <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm flex flex-col h-[200px]">
                     <div class="flex justify-between items-center mb-2">
                         <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
@@ -366,7 +341,6 @@ export function getFrontendHTML() {
                         <button onclick="clearConsole()" class="text-[10px] font-medium text-slate-500 hover:text-slate-300 transition-colors">Limpiar log</button>
                     </div>
 
-                    <!-- ÁREA DE LOGS -->
                     <div id="console-output" class="flex-1 bg-slate-950 p-3 border border-slate-850 rounded-xl overflow-y-auto font-mono text-[10px] flex flex-col gap-1 text-slate-500">
                         [SISTEMA]: Esperando inicialización de tráfico asíncrono secuencial...
                     </div>
@@ -374,7 +348,6 @@ export function getFrontendHTML() {
             </section>
         </main>
 
-        <!-- FOOTER -->
         <footer class="bg-slate-900 border-t border-slate-800 py-4 text-center text-xs text-slate-500">
             <div class="max-w-7xl mx-auto px-4">
                 © 2026 Coordinación ONPE - Replicador de Código Abierto Desplegado Localmente.
@@ -382,10 +355,10 @@ export function getFrontendHTML() {
         </footer>
     </div>
 
-    <!-- SCRIPTS DE INTERACCIÓN CLIENTE (SINGLE PAGE APP) -->
     <script>
         let currentAuthTab = 'login';
         let waStatusPoller = null;
+        let currentQrData = null; // Guardar el valor actual del QR para evitar re-renderizados innecesarios
 
         // Inicialización al cargar la página
         window.addEventListener('load', () => {
@@ -814,6 +787,7 @@ export function getFrontendHTML() {
                 case 'DISCONNECTED':
                     indicator.className = "h-2.5 w-2.5 rounded-full bg-slate-600 animate-none";
                     viewDisconnected.classList.remove('hidden');
+                    currentQrData = null; // Limpiar buffer de QR al desconectar
                     break;
                 case 'INITIALIZING':
                     indicator.className = "h-2.5 w-2.5 rounded-full bg-yellow-500 animate-pulse";
@@ -822,20 +796,27 @@ export function getFrontendHTML() {
                 case 'WAITING_FOR_QR':
                     indicator.className = "h-2.5 w-2.5 rounded-full bg-indigo-500 animate-pulse";
                     viewQr.classList.remove('hidden');
-                    if (qr) {
+                    
+                    if (qr && qr !== currentQrData) {
+                        currentQrData = qr; // Almacenamos el token actual
                         const qrContainer = document.getElementById('qr-image-container');
-                        qrContainer.innerHTML = \`<img src="\&quot;" + qr + "\&quot;" alt="WhatsApp QR" class="h-48 w-48 block">\`;
-                        // Fallback seguro usando asignación directa para prevenir discrepancias del iframe
-                        qrContainer.innerHTML = '';
-                        const imgNode = document.createElement('img');
-                        imgNode.src = qr.startsWith('data:') ? qr : 'data:image/png;base64,' + qr;
-                        imgNode.className = "h-48 w-48 block";
-                        qrContainer.appendChild(imgNode);
+                        qrContainer.innerHTML = ''; // Limpiar errores previos
+                        
+                        // Instanciamos de forma limpia QRCode.js sobre el contenedor
+                        new QRCode(qrContainer, {
+                            text: qr,
+                            width: 200,
+                            height: 200,
+                            colorDark : "#020617",
+                            colorLight : "#ffffff",
+                            correctLevel : QRCode.CorrectLevel.H
+                        });
                     }
                     break;
                 case 'CONNECTED':
                     indicator.className = "h-2.5 w-2.5 rounded-full bg-emerald-500 animate-none";
                     viewConnected.classList.remove('hidden');
+                    currentQrData = null;
                     break;
                 case 'SENDING':
                     indicator.className = "h-2.5 w-2.5 rounded-full bg-emerald-500 animate-ping";
