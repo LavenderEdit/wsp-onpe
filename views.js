@@ -1,5 +1,5 @@
 export function getFrontendHTML() {
-  return `
+    return `
 <!DOCTYPE html>
 <html lang="es" class="h-full bg-slate-950 text-slate-100">
 <head>
