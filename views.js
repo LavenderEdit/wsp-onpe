@@ -115,7 +115,7 @@ export function getFrontendHTML() {
 
         <!-- MAIN CONTAINER -->
         <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <!-- PANEL IZQUIERDO: GESTION DE MIEMBROS DE MESA (5 columnas) -->
+            <!-- PANEL IZQUIERDO: GESTION DE MIEMBROS Y PLANTILLA (5 columnas) -->
             <section class="lg:col-span-5 flex flex-col gap-6">
                 <!-- FORMULARIO AGREGAR -->
                 <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm">
@@ -172,11 +172,60 @@ export function getFrontendHTML() {
                         <span>Editar Mensaje de Presentación</span>
                     </h2>
                     <p class="text-xs text-slate-400 mb-3">Usa las etiquetas dinámicas: <code class="text-blue-400 font-bold">{{nombre}}</code>, <code class="text-indigo-400 font-bold">{{cargo}}</code>, <code class="text-emerald-400 font-bold">{{mesa}}</code>.</p>
-                    <textarea id="template-editor" rows="6" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 text-xs font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none" placeholder="Escribe tu mensaje aquí..."></textarea>
-                    <button onclick="saveTemplate()" class="mt-3 w-full py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-750 text-slate-200 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center gap-2">
+                    <textarea id="template-editor" rows="5" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 text-xs font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none" placeholder="Escribe tu mensaje aquí..."></textarea>
+                    <button onclick="saveTemplate()" class="mt-2 w-full py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-750 text-slate-200 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center gap-2">
                         <i data-lucide="save" class="h-3.5 w-3.5"></i>
                         <span>Guardar Cambios de Plantilla</span>
                     </button>
+                </div>
+
+                <!-- SECCIÓN MULTIMEDIA (NUEVO) -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm">
+                    <h2 class="text-base font-bold text-white flex items-center gap-2 mb-2">
+                        <i data-lucide="image" class="text-indigo-500 h-5 w-5"></i>
+                        <span>Adjuntar Imágenes de Soporte (Máx 2)</span>
+                    </h2>
+                    <p class="text-xs text-slate-400 mb-4">Sube infografías, fotos de credenciales o croquis. Se enviarán junto con tu mensaje.</p>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <!-- ESPACIO DE IMAGEN 1 -->
+                        <div class="flex flex-col items-center">
+                            <span class="text-xs text-slate-400 mb-1 font-semibold">Imagen 1 (Principal)</span>
+                            <div id="img1-container" class="w-full h-32 rounded-xl border border-slate-800 bg-slate-950/40 flex flex-col items-center justify-center relative overflow-hidden transition-all hover:border-blue-500/50">
+                                <div id="img1-empty" class="flex flex-col items-center p-3 cursor-pointer" onclick="triggerFileInput(1)">
+                                    <i data-lucide="cloud-upload" class="h-6 w-6 text-slate-500 mb-1"></i>
+                                    <span class="text-[10px] text-slate-400 text-center">Subir Imagen</span>
+                                </div>
+                                <div id="img1-filled" class="hidden w-full h-full relative group">
+                                    <img id="img1-preview" src="" class="w-full h-full object-cover">
+                                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                        <button onclick="triggerFileInput(1)" class="p-1.5 bg-slate-800 text-white rounded-lg hover:bg-slate-700" title="Reemplazar"><i data-lucide="edit" class="h-4 w-4"></i></button>
+                                        <button onclick="deleteImage(1)" class="p-1.5 bg-red-950/80 text-red-400 rounded-lg hover:bg-red-900" title="Borrar"><i data-lucide="trash-2" class="h-4 w-4"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <input id="file-input-1" type="file" accept="image/*" class="hidden" onchange="handleFileChange(1, this)">
+                        </div>
+
+                        <!-- ESPACIO DE IMAGEN 2 -->
+                        <div class="flex flex-col items-center">
+                            <span class="text-xs text-slate-400 mb-1 font-semibold">Imagen 2 (Anexo)</span>
+                            <div id="img2-container" class="w-full h-32 rounded-xl border border-slate-800 bg-slate-950/40 flex flex-col items-center justify-center relative overflow-hidden transition-all hover:border-blue-500/50">
+                                <div id="img2-empty" class="flex flex-col items-center p-3 cursor-pointer" onclick="triggerFileInput(2)">
+                                    <i data-lucide="cloud-upload" class="h-6 w-6 text-slate-500 mb-1"></i>
+                                    <span class="text-[10px] text-slate-400 text-center">Subir Imagen</span>
+                                </div>
+                                <div id="img2-filled" class="hidden w-full h-full relative group">
+                                    <img id="img2-preview" src="" class="w-full h-full object-cover">
+                                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                        <button onclick="triggerFileInput(2)" class="p-1.5 bg-slate-800 text-white rounded-lg hover:bg-slate-700" title="Reemplazar"><i data-lucide="edit" class="h-4 w-4"></i></button>
+                                        <button onclick="deleteImage(2)" class="p-1.5 bg-red-950/80 text-red-400 rounded-lg hover:bg-red-900" title="Borrar"><i data-lucide="trash-2" class="h-4 w-4"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <input id="file-input-2" type="file" accept="image/*" class="hidden" onchange="handleFileChange(2, this)">
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -196,11 +245,6 @@ export function getFrontendHTML() {
                             <span class="h-2.5 w-2.5 rounded-full bg-slate-600 animate-pulse" id="status-indicator"></span>
                             <span id="status-text" class="text-xs font-bold uppercase tracking-wider text-slate-400">DESCONECTADO</span>
                         </div>
-                    </div>
-
-                    <!-- ACCIONES DE WHATSAPP -->
-                    <div class="flex justify-end gap-3 mb-4 hidden" id="wa-actions-panel">
-                        <!-- Botones de acción dinámicos -->
                     </div>
 
                     <!-- VISUALIZADOR DE QR O ESTADOS -->
@@ -440,6 +484,7 @@ export function getFrontendHTML() {
             // Cargar datos iniciales
             loadMembers();
             loadTemplate();
+            loadImages();
             
             // Iniciar Polling de estado de WhatsApp
             if (waStatusPoller) clearInterval(waStatusPoller);
@@ -475,6 +520,92 @@ export function getFrontendHTML() {
                 }
             } catch (err) {
                 alert("Error de red al guardar la plantilla.");
+            }
+        }
+
+        // -----------------------------------------------------------------
+        // GESTIÓN DE SUBIDA MULTIMEDIA (IMÁGENES DE SOPORTE)
+        // -----------------------------------------------------------------
+        function triggerFileInput(index) {
+            document.getElementById(\`file-input-\${index}\`).click();
+        }
+
+        function handleFileChange(index, input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                alert("Por favor, selecciona únicamente archivos de imagen (PNG, JPG, JPEG).");
+                input.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const base64Data = e.target.result;
+                
+                // Enviamos de forma asíncrona la imagen en base64 al servidor
+                try {
+                    const res = await fetch('/api/template/images', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ index, base64Data })
+                    });
+                    if (res.ok) {
+                        loadImages(); // Recargar miniaturas en UI
+                    } else {
+                        alert("No se pudo subir la imagen.");
+                    }
+                } catch (err) {
+                    console.error("Error de subida:", err);
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function deleteImage(index) {
+            if (confirm(\`¿Estás seguro de que deseas eliminar la Imagen \${index}?\`)) {
+                try {
+                    const res = await fetch(\`/api/template/images/\${index}\`, { method: 'DELETE' });
+                    if (res.ok) {
+                        loadImages();
+                    }
+                } catch (err) {
+                    console.error("Error al borrar:", err);
+                }
+            }
+        }
+
+        async function loadImages() {
+            try {
+                const res = await fetch('/api/template/images');
+                const data = await res.json();
+
+                // Manejo de la miniatura de la Imagen 1
+                if (data.image1) {
+                    document.getElementById('img1-empty').classList.add('hidden');
+                    document.getElementById('img1-filled').classList.remove('hidden');
+                    document.getElementById('img1-preview').src = data.image1;
+                } else {
+                    document.getElementById('img1-empty').classList.remove('hidden');
+                    document.getElementById('img1-filled').classList.add('hidden');
+                    document.getElementById('img1-preview').src = '';
+                }
+
+                // Manejo de la miniatura de la Imagen 2
+                if (data.image2) {
+                    document.getElementById('img2-empty').classList.add('hidden');
+                    document.getElementById('img2-filled').classList.remove('hidden');
+                    document.getElementById('img2-preview').src = data.image2;
+                } else {
+                    document.getElementById('img2-empty').classList.remove('hidden');
+                    document.getElementById('img2-filled').classList.add('hidden');
+                    document.getElementById('img2-preview').src = '';
+                }
+                lucide.createIcons();
+
+            } catch (err) {
+                console.error("Error al cargar miniaturas multimedia:", err);
             }
         }
 
@@ -693,7 +824,13 @@ export function getFrontendHTML() {
                     viewQr.classList.remove('hidden');
                     if (qr) {
                         const qrContainer = document.getElementById('qr-image-container');
-                        qrContainer.innerHTML = \`<img src="\${qr.startsWith('data:') ? qr : 'data:image/png;base64,' + qr}" alt="WhatsApp QR" class="h-48 w-48 block">\`;
+                        qrContainer.innerHTML = \`<img src="\&quot;" + qr + "\&quot;" alt="WhatsApp QR" class="h-48 w-48 block">\`;
+                        // Fallback seguro usando asignación directa para prevenir discrepancias del iframe
+                        qrContainer.innerHTML = '';
+                        const imgNode = document.createElement('img');
+                        imgNode.src = qr.startsWith('data:') ? qr : 'data:image/png;base64,' + qr;
+                        imgNode.className = "h-48 w-48 block";
+                        qrContainer.appendChild(imgNode);
                     }
                     break;
                 case 'CONNECTED':
@@ -723,7 +860,7 @@ export function getFrontendHTML() {
                 const logElement = document.createElement('div');
                 logElement.className = \`flex gap-2 items-start \${colorClass}\`;
                 logElement.innerHTML = \`
-                    <span class="text-slate-600 shrink-0">[\${log.timestamp}]</span>
+                    <span class="text-slate-600 shrink-0">[\&nbsp;\${log.timestamp}\&nbsp;]</span>
                     <span>\${log.message}</span>
                 \`;
                 consoleOutput.appendChild(logElement);
