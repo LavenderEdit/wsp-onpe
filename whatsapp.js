@@ -1,111 +1,58 @@
-import { create } from '@open-wa/wa-automate';
+import { create, ev } from '@open-wa/wa-automate';
+import puppeteer from 'puppeteer-extra';
+import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import { db } from './db.js';
+import fs from 'fs';
+
+puppeteer.use(StealthPlugin());
 
 class WhatsAppManager {
     constructor() {
         this.waClient = null;
-        this.waStatus = 'DISCONNECTED'; // DISCONNECTED, INITIALIZING, WAITING_FOR_QR, CONNECTED, SENDING
-        this.waQrCode = null;
+        this.waStatus = 'DISCONNECTED';
         this.activeWaUserId = null;
-        this.broadcastLogs = [];
-    }
-
-    delay(ms) {
-        return new Promise((resolve) => setTimeout(resolve, ms));
-    }
-
-    logBroadcast(message, type = 'info') {
-        const logEntry = {
-            timestamp: new Date().toLocaleTimeString(),
-            message,
-            type // info, success, warning, error
-        };
-        this.broadcastLogs.push(logEntry);
-        console.log(`[ENVÍO MASIVO] [${type.toUpperCase()}] ${message}`);
-    }
-
-    normalizarNumeroPeru(telefonoCrudo) {
-        let limpio = telefonoCrudo.replace(/\D/g, '');
-        if (limpio.startsWith('51')) {
-            if (limpio.length === 11) return `${limpio}@c.us`;
-        }
-        if (limpio.length === 9 && limpio.startsWith('9')) {
-            return `51${limpio}@c.us`;
-        }
-        throw new Error(`El número "${telefonoCrudo}" no cumple con el plan de numeración de Perú (ej: 987654321).`);
     }
 
     async startSession(userId) {
-        if (this.waStatus !== 'DISCONNECTED') {
-            return { success: false, message: "La sesión ya se encuentra inicializada o en proceso." };
-        }
+        if (this.waStatus !== 'DISCONNECTED') return { success: false, message: "Sesión ya inicializada." };
 
         this.activeWaUserId = userId;
         this.waStatus = 'INITIALIZING';
-        this.waQrCode = null;
-        this.broadcastLogs = [];
 
-        this.logBroadcast("Iniciando motor Google Chrome (Modo Visible)...");
+        const userDataDir = `C:\\Users\\USUARIO\\Documents\\DocLaptop\\Datos\\CCPP\\WebApps\\APP\\wsp-onpe\\_IGNORE_Session_${userId}`;
 
-        create({
-            sessionId: `Session_${userId}`,
-            multiDevice: true,
-            authTimeout: 60,
-            qrTimeout: 0,
-            blockCrashLogs: true,
-            disableSpins: true,
-            headless: false,
-            useChrome: true,
-            cacheEnabled: false,
-            hostNotificationLang: 'es-ES',
-            qrLogSkip: true,
-            qrCallback: (base64QrImg) => {
-                this.waStatus = 'WAITING_FOR_QR';
-                this.waQrCode = base64QrImg;
-                this.logBroadcast("Código QR generado. Esperando escaneo desde tu celular móvil...");
-            }
-        }).then((client) => {
+        try {
+            const client = await create({
+                sessionId: `Session_${userId}`,
+                useChrome: true,
+                executablePath: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                headless: false,
+                userDataDir: userDataDir,
+                qrTimeout: 60,
+                authTimeout: 60,
+                blockCrashLogs: true,
+                args: [
+                    '--disable-infobars',
+                    '--window-size=1280,800',
+                    '--disable-blink-features=AutomationControlled'
+                ]
+            });
+
             this.waClient = client;
             this.waStatus = 'CONNECTED';
-            this.waQrCode = null;
-            this.logBroadcast("¡Autenticación de WhatsApp realizada con éxito!", "success");
+            return { success: true };
 
-            client.onStateChanged((state) => {
-                this.logBroadcast(`Estado de conexión cambiado a: ${state}`, "warning");
-                if (state === 'UNPAIRED' || state === 'CONFLICT') {
-                    this.reset();
-                }
-            });
-        }).catch((err) => {
-            console.error("[WA ERROR] Error al instanciar:", err);
-            this.logBroadcast(`Fallo crítico al iniciar el cliente: ${err.message}`, "error");
+        } catch (err) {
+            console.error("ERROR CRÍTICO:", err);
             this.reset();
-        });
-
-        return { success: true };
-    }
-
-    async stopSession(userId) {
-        if (this.activeWaUserId !== userId) {
-            throw new Error("No tienes permisos para detener esta sesión de WhatsApp activa.");
+            return { success: false, message: err.message };
         }
-        this.logBroadcast("Deteniendo sesión de WhatsApp de forma controlada...");
-        if (this.waClient) {
-            try {
-                await this.waClient.close();
-            } catch (e) {
-                console.error(e);
-            }
-        }
-        this.reset();
-        return { success: true };
     }
 
     reset() {
         this.waClient = null;
         this.waStatus = 'DISCONNECTED';
         this.waQrCode = null;
-        this.activeWaUserId = null;
     }
 
     async sendBulk(userId) {
