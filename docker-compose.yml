@@ -3,7 +3,8 @@ services:
     build: .
     container_name: wsp-onpe-app
     ports:
-      - "9000:9000"
+      - "9000:9000" 
+    shm_size: '1gb'
     environment:
       - IS_DOCKER=true
     volumes:
