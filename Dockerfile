@@ -2,6 +2,12 @@ FROM node:20-slim
 
 RUN apt-get update && apt-get install -y \
     chromium \
+    fonts-ipafont-gothic \
+    fonts-wqy-zenhei \
+    fonts-thai-tlwg \
+    fonts-kacst \
+    fonts-freefont-ttf \
+    libxss1 \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
@@ -11,13 +17,12 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
 
 WORKDIR /app
 
-RUN npm install -g pnpm
+COPY package.json ./
 
-COPY package.json pnpm-lock.yaml* ./
-RUN pnpm install
+RUN npm install
 
 COPY . .
 
 EXPOSE 9000
 
-CMD ["pnpm", "start"]
+CMD ["node", "index.js"]
