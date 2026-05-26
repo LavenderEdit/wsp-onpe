@@ -3,7 +3,7 @@ import cookieParser from 'cookie-parser';
 import { router } from './routes.js';
 
 const app = express();
-const PORT = 3000;
+const PORT = 9000;
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
