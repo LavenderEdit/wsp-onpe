@@ -32,7 +32,8 @@ class WhatsAppService {
           "--no-sandbox",
           "--disable-setuid-sandbox",
           "--disable-dev-shm-usage",
-          "--disable-gpu"
+          "--disable-gpu",
+          "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
         ],
       },
     });
@@ -65,6 +66,20 @@ class WhatsAppService {
         this.waClient = null;
         this.activeWaUserId = null;
       });
+
+      this.waClient.on("error", (err) => {
+        console.error("[SISTEMA] Capturado fallo asíncrono del cliente WA:", err);
+        this.waStatus = "DISCONNECTED";
+        this.waClient = null;
+        this.activeWaUserId = null;
+      });
+
+      this.waClient.on("auth_failure", (msg) => {
+        console.error("[SISTEMA] Fallo de autenticación en WA:", msg);
+        this.waStatus = "DISCONNECTED";
+        this.waClient = null;
+        this.activeWaUserId = null;
+      });
     }
 
     this.activeWaUserId = userId;
@@ -72,14 +87,19 @@ class WhatsAppService {
       await this.waClient.initialize();
       return { success: true };
     } catch (e) {
-      console.error(e);
-      return { success: false, message: "Error al inicializar cliente." };
+      console.error("[SISTEMA] Excepción al inicializar cliente WA:", e);
+      this.reset();
+      return { success: false, message: "Error al inicializar cliente de WhatsApp." };
     }
   }
 
   async stopSession(userId) {
     if (this.waClient && this.activeWaUserId === userId) {
-      await this.waClient.destroy();
+      try {
+        await this.waClient.destroy();
+      } catch (e) {
+        console.error(e);
+      }
       this.waClient = null;
       this.waStatus = "DISCONNECTED";
       this.activeWaUserId = null;
@@ -153,7 +173,7 @@ class WhatsAppService {
                 "soporte_principal.png",
               );
               await this.waClient.sendMessage(chatId, media1);
-              await this._sleep(2000); // Pequeña pausa táctica entre multimedia y texto
+              await this._sleep(2000);
             } catch (errImg1) {
               this.broadcastLogs.push({
                 timestamp: this._getTimestamp(),
@@ -229,6 +249,13 @@ class WhatsAppService {
         this.waStatus = "CONNECTED";
       }
     })();
+  }
+
+  reset() {
+    this.waClient = null;
+    this.waStatus = "DISCONNECTED";
+    this.waQrCode = null;
+    this.activeWaUserId = null;
   }
 }
 
