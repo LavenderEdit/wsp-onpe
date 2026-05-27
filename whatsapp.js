@@ -8,13 +8,29 @@ import { db } from "./db.js";
 const { Client, LocalAuth, MessageMedia } = pkg;
 puppeteer.use(StealthPlugin());
 
-class WhatsAppService {
+class WhatsAppMultiManager {
   constructor() {
-    this.waClient = null;
-    this.waStatus = "DISCONNECTED";
-    this.waQrCode = null;
-    this.activeWaUserId = null;
-    this.broadcastLogs = [];
+    this.sessions = new Map();
+  }
+
+  getSession(userId) {
+    if (!this.sessions.has(userId)) {
+      this.sessions.set(userId, {
+        client: null,
+        status: "DISCONNECTED",
+        qr: null,
+        pairingCode: null,
+        logs: []
+      });
+    }
+    return this.sessions.get(userId);
+  }
+
+  addLog(userId, type, message) {
+    const session = this.getSession(userId);
+    const time = new Date().toLocaleTimeString("es-PE", { hour12: false });
+    session.logs.push({ timestamp: time, type, message });
+    if (session.logs.length > 200) session.logs.shift();
   }
 
   _clearLocks(userId) {
@@ -23,265 +39,140 @@ class WhatsAppService {
       const locks = [
         path.join(sessionPath, 'SingletonLock'),
         path.join(sessionPath, 'SingletonCookie'),
-        path.join(sessionPath, 'Default', 'SingletonLock'),
-        path.join(sessionPath, 'Default', 'SingletonCookie')
+        path.join(sessionPath, 'Default', 'SingletonLock')
       ];
-
-      locks.forEach(lockPath => {
-        if (fs.existsSync(lockPath)) {
-          fs.unlinkSync(lockPath);
-          console.log(`[SISTEMA] Candado residual eliminado: ${lockPath}`);
-        }
-      });
-    } catch (error) {
-      console.error("[SISTEMA] Error al limpiar candados de sesión:", error);
-    }
+      locks.forEach(lock => fs.existsSync(lock) && fs.unlinkSync(lock));
+    } catch (error) { }
   }
 
-  _createClient(userId) {
-    const isDocker = process.env.IS_DOCKER === 'true';
-    const chromePath = isDocker
-      ? "/usr/bin/chromium"
-      : "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+  async startSession(userId, phoneNumber = null) {
+    const session = this.getSession(userId);
+    if (session.client) return { success: false, message: "La sesión ya está iniciada." };
 
-    return new Client({
+    this._clearLocks(userId);
+
+    const isDocker = process.env.IS_DOCKER === 'true';
+    const chromePath = isDocker ? "/usr/bin/chromium" : "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+
+    session.client = new Client({
       authStrategy: new LocalAuth({ clientId: userId }),
       puppeteer: {
         headless: true,
         executablePath: chromePath,
-        args: [
-          "--no-sandbox",
-          "--disable-setuid-sandbox",
-          "--disable-dev-shm-usage",
-          "--disable-gpu",
-          "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
-        ],
+        args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-gpu"],
       },
     });
-  }
 
-  async startSession(userId) {
-    if (
-      this.waClient &&
-      this.activeWaUserId &&
-      this.activeWaUserId !== userId
-    ) {
-      return { success: false, message: "Otra sesión está activa." };
-    }
+    session.status = "INITIALIZING";
+    session.logs = [];
+    this.addLog(userId, "info", "Iniciando motor de WhatsApp...");
 
-    this._clearLocks(userId);
+    session.client.on("qr", async (qr) => {
+      session.qr = qr;
+      session.status = "WAITING_FOR_QR";
 
-    if (!this.waClient) {
-      this.waClient = this._createClient(userId);
+      if (phoneNumber) {
+        try {
+          session.status = "WAITING_FOR_CODE";
+          const code = await session.client.requestPairingCode(phoneNumber);
+          session.pairingCode = code;
+          this.addLog(userId, "info", `Código de vinculación generado: ${code}`);
+        } catch (e) {
+          this.addLog(userId, "error", "Error al generar código: " + e.message);
+        }
+      }
+    });
 
-      this.waClient.on("qr", (qr) => {
-        this.waQrCode = qr;
-        this.waStatus = "WAITING_FOR_QR";
-      });
+    session.client.on("ready", () => {
+      session.status = "CONNECTED";
+      session.qr = null;
+      session.pairingCode = null;
+      this.addLog(userId, "success", "¡WhatsApp conectado y listo!");
+    });
 
-      this.waClient.on("ready", () => {
-        this.waStatus = "CONNECTED";
-        this.waQrCode = null;
-      });
+    session.client.on("disconnected", (reason) => {
+      this.addLog(userId, "warning", "WhatsApp desconectado: " + reason);
+      this.stopSession(userId);
+    });
 
-      this.waClient.on("disconnected", () => {
-        this.waStatus = "DISCONNECTED";
-        this.waClient = null;
-        this.activeWaUserId = null;
-      });
-
-      this.waClient.on("error", (err) => {
-        console.error("[SISTEMA] Capturado fallo asíncrono del cliente WA:", err);
-        this.waStatus = "DISCONNECTED";
-        this.waClient = null;
-        this.activeWaUserId = null;
-      });
-
-      this.waClient.on("auth_failure", (msg) => {
-        console.error("[SISTEMA] Fallo de autenticación en WA:", msg);
-        this.waStatus = "DISCONNECTED";
-        this.waClient = null;
-        this.activeWaUserId = null;
-      });
-    }
-
-    this.activeWaUserId = userId;
     try {
-      await this.waClient.initialize();
+      await session.client.initialize();
       return { success: true };
     } catch (e) {
-      console.error("[SISTEMA] Excepción al inicializar cliente WA:", e);
-      this.reset();
-      return { success: false, message: "Error al inicializar cliente de WhatsApp. Verifica los candados." };
+      this.stopSession(userId);
+      return { success: false, message: "Fallo al inicializar. Reintenta." };
     }
   }
 
   async stopSession(userId) {
-    if (this.waClient && this.activeWaUserId === userId) {
+    const session = this.getSession(userId);
+    if (session.client) {
       try {
-        await this.waClient.destroy();
-      } catch (e) {
-        console.error(e);
-      }
-      this.waClient = null;
-      this.waStatus = "DISCONNECTED";
-      this.activeWaUserId = null;
-
-      this._clearLocks(userId);
+        await session.client.logout();
+      } catch (e) { }
+      try {
+        await session.client.destroy();
+      } catch (e) { }
     }
-  }
-
-  _sleep(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
-  _getTimestamp() {
-    const now = new Date();
-    return now.toLocaleTimeString("es-PE", { hour12: false });
+    this.sessions.delete(userId);
+    this._clearLocks(userId);
   }
 
   async sendBulk(userId) {
-    if (!this.waClient || this.waStatus !== "CONNECTED") {
-      throw new Error(
-        "El motor de emulación de WhatsApp no está listo o está desconectado.",
-      );
+    const session = this.getSession(userId);
+    if (!session.client || session.status !== "CONNECTED") {
+      throw new Error("Debes conectar tu WhatsApp primero.");
     }
 
     const members = db.getMembers(userId);
     const template = db.getTemplate(userId);
     const imagesInfo = db.getUserImagesInfo(userId);
 
-    if (!members || members.length === 0) {
-      throw new Error(
-        "No hay miembros de mesa registrados para iniciar la transmisión.",
-      );
-    }
+    if (members.length === 0) throw new Error("No hay miembros para enviar.");
 
-    this.waStatus = "SENDING";
-    this.broadcastLogs = [];
-
-    this.broadcastLogs.push({
-      timestamp: this._getTimestamp(),
-      type: "info",
-      message: `Iniciando transmisión masiva para ${members.length} destinatarios...`,
-    });
+    session.status = "SENDING";
+    this.addLog(userId, "info", `Iniciando envío a ${members.length} contactos...`);
 
     (async () => {
-      try {
-        for (const member of members) {
-          let formattedPhone = member.telefono.trim().replace(/\D/g, "");
-          if (!formattedPhone.startsWith("51")) {
-            formattedPhone = `51${formattedPhone}`;
-          }
-          const chatId = `${formattedPhone}@c.us`;
+      let exitos = 0, errores = 0;
+      for (const member of members) {
+        let phone = member.telefono.trim().replace(/\D/g, "");
+        if (phone.length === 9) phone = `51${phone}`;
+        const chatId = `${phone}@c.us`;
 
-          let customizedMessage = template
-            .replace(/{{nombre}}/g, member.nombre)
-            .replace(/{{mesa}}/g, member.mesa)
-            .replace(/{{cargo}}/g, member.rol);
+        let msg = template.replace(/{{nombre}}/gi, member.nombre).replace(/{{mesa}}/gi, member.mesa).replace(/{{cargo}}/gi, member.rol);
 
-          this.broadcastLogs.push({
-            timestamp: this._getTimestamp(),
-            type: "info",
-            message: `Procesando envío hacia: ${member.nombre} (${member.rol})...`,
-          });
+        this.addLog(userId, "info", `Enviando a ${member.nombre}...`);
 
+        try {
           if (imagesInfo.image1) {
-            try {
-              const base64Clean = imagesInfo.image1.replace(
-                /^data:image\/\w+;base64,/,
-                "",
-              );
-              const media1 = new MessageMedia(
-                "image/png",
-                base64Clean,
-                "soporte_principal.png",
-              );
-              await this.waClient.sendMessage(chatId, media1);
-              await this._sleep(2000);
-            } catch (errImg1) {
-              this.broadcastLogs.push({
-                timestamp: this._getTimestamp(),
-                type: "warning",
-                message: `No se pudo adjuntar la Imagen Principal para ${member.nombre}: ${errImg1.message}`,
-              });
-            }
+            const m1 = new MessageMedia("image/png", imagesInfo.image1.replace(/^data:image\/\w+;base64,/, ""), "img1.png");
+            await session.client.sendMessage(chatId, m1);
+            await new Promise(r => setTimeout(r, 1500));
           }
-
           if (imagesInfo.image2) {
-            try {
-              const base64Clean = imagesInfo.image2.replace(
-                /^data:image\/\w+;base64,/,
-                "",
-              );
-              const media2 = new MessageMedia(
-                "image/png",
-                base64Clean,
-                "anexo_soporte.png",
-              );
-              await this.waClient.sendMessage(chatId, media2);
-              await this._sleep(2000);
-            } catch (errImg2) {
-              this.broadcastLogs.push({
-                timestamp: this._getTimestamp(),
-                type: "warning",
-                message: `No se pudo adjuntar la Imagen de Anexo para ${member.nombre}: ${errImg2.message}`,
-              });
-            }
+            const m2 = new MessageMedia("image/png", imagesInfo.image2.replace(/^data:image\/\w+;base64,/, ""), "img2.png");
+            await session.client.sendMessage(chatId, m2);
+            await new Promise(r => setTimeout(r, 1500));
           }
 
-          try {
-            await this.waClient.sendMessage(chatId, customizedMessage);
-
-            db.updateMemberStatus(userId, member.id, "llamado", true);
-
-            this.broadcastLogs.push({
-              timestamp: this._getTimestamp(),
-              type: "success",
-              message: `✓ Mensaje entregado con éxito a ${member.nombre}.`,
-            });
-          } catch (errText) {
-            this.broadcastLogs.push({
-              timestamp: this._getTimestamp(),
-              type: "error",
-              message: `✕ Error crítico al enviar texto a ${member.nombre}: ${errText.message}`,
-            });
-          }
-
-          const randomDelay =
-            Math.floor(Math.random() * (12000 - 6000 + 1)) + 6000;
-          await this._sleep(randomDelay);
+          await session.client.sendMessage(chatId, msg);
+          await db.updateMemberStatus(userId, member.id, "llamado", true);
+          this.addLog(userId, "success", `✓ Enviado a ${member.nombre} (${phone})`);
+          exitos++;
+        } catch (e) {
+          this.addLog(userId, "error", `✕ Falló ${member.nombre}: ${e.message}`);
+          errores++;
         }
 
-        this.broadcastLogs.push({
-          timestamp: this._getTimestamp(),
-          type: "success",
-          message: "=========================================",
-        });
-        this.broadcastLogs.push({
-          timestamp: this._getTimestamp(),
-          type: "success",
-          message:
-            "🎉 PROCESO TERMINADO: Despacho secuencial completado de forma segura.",
-        });
-      } catch (globalError) {
-        this.broadcastLogs.push({
-          timestamp: this._getTimestamp(),
-          type: "error",
-          message: `Fallo general en la cola de envíos: ${globalError.message}`,
-        });
-      } finally {
-        this.waStatus = "CONNECTED";
+        const delay = Math.floor(Math.random() * 6000) + 6000;
+        await new Promise(r => setTimeout(r, delay));
       }
-    })();
-  }
 
-  reset() {
-    this.waClient = null;
-    this.waStatus = "DISCONNECTED";
-    this.waQrCode = null;
-    this.activeWaUserId = null;
+      this.addLog(userId, "success", `🔥 PROCESO TERMINADO. Éxitos: ${exitos} | Errores: ${errores}`);
+      session.status = "CONNECTED";
+    })();
   }
 }
 
-export const whatsappManager = new WhatsAppService();
+export const whatsappManager = new WhatsAppMultiManager();
