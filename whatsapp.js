@@ -17,14 +17,35 @@ class WhatsAppService {
     this.broadcastLogs = [];
   }
 
-  _createClient() {
+  _clearLocks(userId) {
+    try {
+      const sessionPath = path.join(process.cwd(), '.wwebjs_auth', `session-${userId}`);
+      const locks = [
+        path.join(sessionPath, 'SingletonLock'),
+        path.join(sessionPath, 'SingletonCookie'),
+        path.join(sessionPath, 'Default', 'SingletonLock'),
+        path.join(sessionPath, 'Default', 'SingletonCookie')
+      ];
+
+      locks.forEach(lockPath => {
+        if (fs.existsSync(lockPath)) {
+          fs.unlinkSync(lockPath);
+          console.log(`[SISTEMA] Candado residual eliminado: ${lockPath}`);
+        }
+      });
+    } catch (error) {
+      console.error("[SISTEMA] Error al limpiar candados de sesión:", error);
+    }
+  }
+
+  _createClient(userId) {
     const isDocker = process.env.IS_DOCKER === 'true';
     const chromePath = isDocker
       ? "/usr/bin/chromium"
       : "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
 
     return new Client({
-      authStrategy: new LocalAuth({ clientId: "client-one" }),
+      authStrategy: new LocalAuth({ clientId: userId }),
       puppeteer: {
         headless: true,
         executablePath: chromePath,
@@ -48,8 +69,10 @@ class WhatsAppService {
       return { success: false, message: "Otra sesión está activa." };
     }
 
+    this._clearLocks(userId);
+
     if (!this.waClient) {
-      this.waClient = this._createClient();
+      this.waClient = this._createClient(userId);
 
       this.waClient.on("qr", (qr) => {
         this.waQrCode = qr;
@@ -89,7 +112,7 @@ class WhatsAppService {
     } catch (e) {
       console.error("[SISTEMA] Excepción al inicializar cliente WA:", e);
       this.reset();
-      return { success: false, message: "Error al inicializar cliente de WhatsApp." };
+      return { success: false, message: "Error al inicializar cliente de WhatsApp. Verifica los candados." };
     }
   }
 
@@ -103,6 +126,8 @@ class WhatsAppService {
       this.waClient = null;
       this.waStatus = "DISCONNECTED";
       this.activeWaUserId = null;
+
+      this._clearLocks(userId);
     }
   }
 
